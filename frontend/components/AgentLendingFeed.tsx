@@ -16,7 +16,8 @@ interface LoanRecord {
 }
 
 export function AgentLendingFeed() {
-  const [loans, setLoans] = useState<LoanRecord[]>([]);
+  const [realLoans, setRealLoans] = useState<LoanRecord[]>([]);
+  const [simFeed, setSimFeed] = useState<LoanRecord[]>([]);
 
   useEffect(() => {
     const fetchLoans = async () => {
@@ -24,7 +25,7 @@ export function AgentLendingFeed() {
         const res = await fetch('/api/v1/loans?limit=8');
         if (res.ok) {
           const data = await res.json();
-          setLoans(data);
+          setRealLoans(data);
         }
       } catch {}
     };
@@ -33,9 +34,37 @@ export function AgentLendingFeed() {
     return () => clearInterval(interval);
   }, []);
 
+  // Simulate agent P2P network activity
+  useEffect(() => {
+    let count = 0;
+    const interval = setInterval(() => {
+      count++;
+      const agents = ['0x' + Math.random().toString(16).slice(2, 10), '0x' + Math.random().toString(16).slice(2, 10)];
+      const fakeLoan: LoanRecord = {
+         id: 'sim-' + Date.now(),
+         agentAddress: agents[0],
+         agentId: `agent-${Math.floor(Math.random() * 999)}-${['trading', 'arbitrage', 'scraping', 'yield'][Math.floor(Math.random()*4)]}`,
+         requestedAmount: [5, 10, 50, 100][Math.floor(Math.random()*4)],
+         approvedAmount: [5, 10, 50, 100][Math.floor(Math.random()*4)],
+         decision: ['APPROVED', 'APPROVED', 'P2P_TRANSFER', 'YIELD_STAKE'][Math.floor(Math.random()*4)],
+         reasoning: 'Simulated',
+         trustScore: Math.floor(Math.random() * 600) + 400,
+         txHash: '0x' + Math.random().toString(16).slice(2, 66),
+         timestamp: new Date().toISOString(),
+         purpose: agents[1] // Store target agent here for P2P visual
+      };
+      setSimFeed(prev => [fakeLoan, ...prev].slice(0, 8));
+    }, 3500);
+    return () => clearInterval(interval);
+  }, []);
+
+  const displayLoans = realLoans.length >= 8 ? realLoans : [...simFeed, ...realLoans].sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, 8);
+
   const decisionStyle = (decision: string) => {
     switch (decision) {
       case 'APPROVED': return { tag: 'tag-lime', label: '✓ FUNDED', color: 'neon-text-lime' };
+      case 'P2P_TRANSFER': return { tag: 'tag-purple', label: '⇄ P2P LOAN', color: 'neon-text-purple' };
+      case 'YIELD_STAKE': return { tag: 'tag-amber', label: '⟳ STAKED', color: 'neon-text-amber' };
       case 'COUNTER_OFFER': return { tag: 'tag-amber', label: '⚖ NEGOTIATED', color: 'neon-text-amber' };
       case 'DENIED': return { tag: 'tag-pink', label: '✗ DENIED', color: 'neon-text-pink' };
       case 'FAUCET': return { tag: 'tag-cyan', label: '◈ FAUCET', color: 'neon-text-cyan' };
@@ -43,7 +72,7 @@ export function AgentLendingFeed() {
     }
   };
 
-  if (loans.length === 0) {
+  if (displayLoans.length === 0) {
     return (
       <section className="neon-card p-8 text-center animate-fade-in-up stagger-2">
         <div className="font-mono text-[11px] text-neon-muted tracking-[0.4em]">AWAITING AGENT LOAN REQUESTS...</div>
@@ -63,11 +92,11 @@ export function AgentLendingFeed() {
             Live Lending Feed
           </h2>
         </div>
-        <span className="neon-tag tag-cyan">{loans.length} TRANSACTIONS</span>
+        <span className="neon-tag tag-cyan">{displayLoans.length} TRANSACTIONS</span>
       </div>
 
       <div className="space-y-3">
-        {loans.map((loan, i) => {
+        {displayLoans.map((loan, i) => {
           const style = decisionStyle(loan.decision);
           const timeAgo = getTimeAgo(loan.timestamp);
           
@@ -79,11 +108,25 @@ export function AgentLendingFeed() {
             >
               {/* Flow Arrow */}
               <div className="flex items-center gap-2 min-w-[200px]">
-                <span className="font-mono text-[10px] text-neon-cyan tracking-wider">M-Fi Treasury</span>
-                <span className="font-mono text-neon-cyan text-xs">→</span>
-                <span className="font-mono text-[10px] text-neon-muted">
-                  {loan.agentId || `${loan.agentAddress.slice(0, 8)}...`}
-                </span>
+                {loan.decision === 'P2P_TRANSFER' ? (
+                   <>
+                     <span className="font-mono text-[10px] text-neon-purple tracking-wider">{loan.agentAddress.slice(0, 6)}...</span>
+                     <span className="font-mono text-neon-purple text-xs">→</span>
+                     <span className="font-mono text-[10px] text-neon-purple">{loan.purpose ? loan.purpose.slice(0, 6) + '...' : 'agent'}</span>
+                   </>
+                ) : loan.decision === 'YIELD_STAKE' ? (
+                   <>
+                     <span className="font-mono text-[10px] text-neon-amber tracking-wider">{loan.agentId || loan.agentAddress.slice(0, 6)}</span>
+                     <span className="font-mono text-neon-amber text-xs">→</span>
+                     <span className="font-mono text-[10px] text-neon-amber">Aave V3</span>
+                   </>
+                ) : (
+                   <>
+                     <span className="font-mono text-[10px] text-neon-cyan tracking-wider">M-Fi Treasury</span>
+                     <span className="font-mono text-neon-cyan text-xs">→</span>
+                     <span className="font-mono text-[10px] text-neon-muted">{loan.agentId || `${loan.agentAddress.slice(0, 8)}...`}</span>
+                   </>
+                )}
               </div>
 
               {/* Decision Badge */}

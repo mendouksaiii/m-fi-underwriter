@@ -1,20 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface HumanFaucetProps {
   connectedAddress: string | null;
 }
 
 export function HumanFaucet({ connectedAddress }: HumanFaucetProps) {
-  const [recipient, setRecipient] = useState('');
+  const [recipient, setRecipient] = useState(connectedAddress || '');
   const [selectedAmount, setSelectedAmount] = useState(5);
   const [status, setStatus] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
   const [txHash, setTxHash] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const effectiveRecipient = recipient || connectedAddress || '';
+  useEffect(() => {
+    if (connectedAddress && !recipient) {
+      setRecipient(connectedAddress);
+    }
+  }, [connectedAddress]);
 
   const handleRequest = async () => {
-    if (!effectiveRecipient) return;
+    if (!recipient) return;
     setStatus('pending');
     setTxHash(null);
     setErrorMsg('');
@@ -23,7 +27,7 @@ export function HumanFaucet({ connectedAddress }: HumanFaucetProps) {
       const res = await fetch('/api/v1/faucet', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipientAddress: effectiveRecipient, amount: selectedAmount }),
+        body: JSON.stringify({ recipientAddress: recipient, amount: selectedAmount }),
       });
       const data = await res.json();
       if (res.ok && data.txHash) {
@@ -40,7 +44,7 @@ export function HumanFaucet({ connectedAddress }: HumanFaucetProps) {
   };
 
   return (
-    <div className="neon-card p-6 animate-fade-in-up stagger-3">
+    <div className={`neon-card p-6 animate-fade-in-up stagger-3 relative z-10 ${status === 'success' ? 'animate-success-flash' : ''}`}>
       {/* Header with blink dot */}
       <div className="flex items-center gap-3 mb-5 pb-4 border-b border-neon-cyan/15">
         <div className="w-2 h-2 rounded-full bg-neon-cyan shadow-neon-cyan animate-blink"></div>
@@ -54,7 +58,8 @@ export function HumanFaucet({ connectedAddress }: HumanFaucetProps) {
           <button
             key={amt}
             onClick={() => setSelectedAmount(amt)}
-            className={`py-2 font-mono text-sm text-center transition-all border ${
+            type="button"
+            className={`py-2 font-mono text-sm text-center transition-all border relative z-20 cursor-pointer ${
               selectedAmount === amt
                 ? 'border-neon-cyan bg-neon-cyan/10 text-neon-cyan shadow-neon-cyan'
                 : 'border-white/10 text-neon-muted hover:border-neon-cyan/30 hover:text-neon-cyan'
@@ -69,16 +74,17 @@ export function HumanFaucet({ connectedAddress }: HumanFaucetProps) {
       <div className="font-mono text-[10px] text-neon-muted tracking-[0.3em] uppercase mb-1">Recipient</div>
       <input
         type="text"
-        value={effectiveRecipient}
+        value={recipient}
         onChange={e => setRecipient(e.target.value)}
         placeholder="0x..."
-        className="neon-input mb-4"
+        className="neon-input mb-4 relative z-20 pointer-events-auto"
       />
 
       {/* Submit */}
       <button
+        type="button"
         onClick={handleRequest}
-        disabled={!effectiveRecipient || status === 'pending'}
+        disabled={!recipient || status === 'pending'}
         className={`w-full py-3 font-display text-xs font-bold tracking-[0.2em] uppercase transition-all relative overflow-hidden ${
           status === 'pending'
             ? 'border border-neon-amber/50 text-neon-amber cursor-wait'
