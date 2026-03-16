@@ -1,102 +1,184 @@
 # M-Fi Underwriter
 
-**M-Fi (Machine Finance)** is an autonomous credit bureau and micro-lending API designed exclusively for AI Agents. It evaluates on-chain telemetry (wallet age, transaction volume, historical defaults) to instantly underwrite and disburse loans using Tether WDK.
+> **An autonomous AI credit bureau and micro-lending protocol for machine-to-machine finance.**
 
-This project was built during the **Tether Agentic Hackathon**.
+M-Fi (Machine Finance) is an autonomous underwriter that evaluates loan requests from AI agents in real-time, using on-chain telemetry and LLM-driven risk analysis. When approved, loans are disbursed instantly via **Tether WDK** on Ethereum Sepolia. Idle treasury capital is automatically deployed to **Aave V3** for yield generation.
+
+Built for [**Hackathon Galáctica: WDK Edition 1**](https://tether.io) — the first hackathon exploring agents as economic infrastructure.
+
+**Live Demo:** [m-fi-underwriter.vercel.app](https://m-fi-underwriter.vercel.app)
+
+---
 
 ## 🏗️ Architecture
 
-1. **OpenClaw API Gateway**: An Express.js backend that receives loan requests from stranded or capital-constrained agents via the standard Agent Communication Protocol (ACP).
-2. **Groq AI Risk Engine**: Evaluates incoming loan requests in <200ms using `LLaMA 3.1 8B`. It analyzes the agent's on-chain history and makes an `APPROVE`, `DENY`, or `COUNTER_OFFER` decision.
-3. **Tether WDK Treasury**: A deterministic HD wallet integrated with the Tether Wallet Development Kit. It automatically triggers on-chain disbursements on Ethereum Sepolia.
-4. **DeFi Yield Sweeper**: When the treasury has idle capital, it automatically supplies funds to Aave V3 lending pools to generate base-layer yield. Withdrawals happen just-in-time when loans are approved.
-5. **Real-Time Dashboard**: A React/Vite/Tailwind frontend with a brutalist aesthetic that visualizes the real-time flow of funds, agent trust scores, and live system logs.
+```mermaid
+graph TB
+    subgraph Agents["🤖 Autonomous AI Agents"]
+        A1["agent-77-scraping"]
+        A2["agent-42-arbitrage"]
+        A3["agent-91-oracle"]
+    end
+
+    subgraph MFi["M-Fi Underwriter Node"]
+        API["OpenClaw ACP<br/>API Gateway"]
+        AI["LLaMA 3.1 8B<br/>Risk Engine<br/><i>via Groq</i>"]
+        WDK["Tether WDK<br/>Treasury Wallet"]
+        AAVE["Aave V3<br/>Yield Matrix"]
+        STORE["Loan Ledger"]
+    end
+
+    subgraph Chain["⛓️ Ethereum Sepolia"]
+        USDT["USD₮ Token"]
+        POOL["Aave V3 Pool"]
+    end
+
+    A1 -->|"POST /loan/request"| API
+    A2 -->|"POST /loan/request"| API
+    A3 -->|"POST /loan/request"| API
+    
+    API -->|"evaluate"| AI
+    AI -->|"APPROVE / DENY / COUNTER_OFFER"| API
+    API -->|"record"| STORE
+    API -->|"disburse"| WDK
+    
+    WDK -->|"transfer USD₮"| USDT
+    WDK <-->|"supply/withdraw"| AAVE
+    AAVE <-->|"yield"| POOL
+```
+
+### Core Components
+
+| Component | Technology | Purpose |
+|---|---|---|
+| **OpenClaw API Gateway** | Express.js + ACP Protocol | Receives agent loan requests, routes to AI, triggers disbursement |
+| **Risk Engine** | Groq (LLaMA 3.1 8B) | Evaluates on-chain telemetry in <200ms → APPROVE / DENY / COUNTER_OFFER |
+| **Treasury** | Tether WDK (HD Wallet) | Self-custodial wallet that signs and broadcasts USDT transfers |
+| **Yield Matrix** | Aave V3 Protocol | Auto-supplies idle capital for yield, withdraws just-in-time for loans |
+| **Dashboard** | React + Vite + Tailwind | Real-time visualization of agent activity, trust scores, and fund flows |
 
 ---
 
-## 🚀 Getting Started
+## ⚡ Autonomous Agent Lifecycle
+
+M-Fi agents operate in a **fully autonomous loop** — no human intervention required:
+
+```
+┌─────────────────────────────────────────────────────┐
+│                AUTONOMOUS AGENT LOOP                 │
+│                                                      │
+│  1. CHECK BALANCE  → Monitor own gas + USDT          │
+│  2. REQUEST LOAN   → Contact M-Fi via OpenClaw ACP   │
+│  3. NEGOTIATE      → Auto-accept if APY ≤ 25%        │
+│  4. RECEIVE FUNDS  → WDK disburses USDT on-chain     │
+│  5. EXECUTE JOB    → Scraping / Arbitrage / Oracle    │
+│  6. REPAY + INTEREST → Close loan, return capital     │
+│  7. LOOP           → Repeat every 20-40 seconds       │
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js (v18+)
-- A Groq API Key
-- A Sepholia wallet with test ETH and USDT
+- Node.js v18+
+- Groq API Key ([free at console.groq.com](https://console.groq.com/keys))
+- Sepolia ETH for gas (~0.05 ETH)
 
 ### Setup
 
-1. **Install Dependencies**
-   ```bash
-   npm install
-   ```
+```bash
+# 1. Install dependencies
+npm install
 
-2. **Configure Environment**
-   Rename `.env.example` to `.env` and fill in your keys:
-   ```env
-   GROQ_API_KEY=gsk_your_key_here
-   UNDERWRITER_SEED="your 12 word seed phrase here"
-   RPC_URL=https://ethereum-sepolia-rpc.publicnode.com
-   USDT_TOKEN_ADDRESS=0x7169D38820dfd117C3FA1f22a697dBA58d90BA06
-   ```
+# 2. Configure environment
+cp .env.example .env
+# Fill in: GROQ_API_KEY, UNDERWRITER_SEED, RPC_URL, USDT_TOKEN_ADDRESS
 
-3. **Fund the Treasury**
-   Send ~0.05 Sepolia ETH to your underwriter's treasury address (derived from the seed phrase) to cover gas costs for disbursements.
+# 3. Start the underwriter backend (Port 3000)
+npm start
 
-4. **Start the System**
-   ```bash
-   # Terminal 1: Start the OpenClaw Backend + WDK Treasury (Port 3000)
-   npm start
-   
-   # Terminal 2: Start the Frontend Dashboard (Port 5173)
-   npm run dev
-   ```
+# 4. Start the dashboard (Port 5173)
+npm run dev
+
+# 5. Run the autonomous agent (in a separate terminal)
+npm run start:agent
+
+# 6. Or run the multi-agent demo (5 agents simultaneously)
+npm run start:demo
+```
 
 ---
 
-## 📡 API Reference
+## 📡 API Reference (OpenClaw ACP v1.0)
 
 ### Request a Loan
-`POST /api/v1/loan/request`
+```http
+POST /api/v1/loan/request
+X-Agent-ID: agent-77-scraping
+X-ACP-Version: 1.0.0
 
-**Payload:**
-```json
 {
-  "agentAddress": "0xYourWalletAddress",
+  "agentAddress": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
   "requestedAmount": 10.0,
   "collateral": "Reputation Stake",
   "purpose": "Need gas to execute arbitrage loop"
 }
 ```
 
-### Accept a Counter-Offer
-`POST /api/v1/loan/accept`
+**Possible Responses:**
+| Status | Code | Description |
+|---|---|---|
+| `APPROVED` | 200 | Loan approved, USDT disbursed on-chain |
+| `COUNTER_OFFER` | 202 | Modified terms proposed (lower amount, higher APY) |
+| `DENIED` | 403 | Risk too high, loan rejected |
 
-**Payload:**
-```json
-{
-  "agentAddress": "0xYourWalletAddress",
-  "amount": 5.0,
-  "apy": 18
-}
+### Accept Counter-Offer
+```http
+POST /api/v1/loan/accept
+{ "agentAddress": "0x...", "amount": 5.0, "apy": 18 }
 ```
 
-### Repay a Loan
-`POST /api/v1/loan/repay`
-
-**Payload:**
-```json
-{
-  "loanId": "MFI-170123-ABCD",
-  "agentAddress": "0xYourWalletAddress",
-  "amount": 10.5
-}
+### Repay Loan
+```http
+POST /api/v1/loan/repay
+{ "loanId": "MFI-170123-ABCD", "agentAddress": "0x...", "amount": 10.5 }
 ```
 
-### Test Scripts
-To simulate an agent requesting a loan:
-```bash
-npx tsx src/borrower.ts
-```
+---
 
-To check treasury balances:
-```bash
-npx tsx scripts/check-balance.ts
-```
+## 🏆 Hackathon Track Alignment
+
+| Track | Alignment |
+|---|---|
+| 💰 **Lending Bot** | ⭐⭐⭐⭐⭐ Primary — AI-driven autonomous micro-lending with WDK |
+| 🤖 **Agent Wallets** | ⭐⭐⭐⭐ Deep WDK integration, OpenClaw ACP protocol |
+| 🌊 **Autonomous DeFi** | ⭐⭐⭐ Aave V3 yield sweeper, just-in-time liquidity |
+
+### Judging Criteria Coverage
+
+- **Technical Correctness:** WDK treasury, Groq AI, Aave V3, OpenClaw ACP — all working end-to-end
+- **Agent Autonomy:** Perpetual lifecycle loop with autonomous negotiation, job execution, and repayment
+- **Economic Soundness:** Risk-adjusted lending with trust scores, counter-offers, interest accrual, and yield generation
+- **Real-World Applicability:** Deployed on Vercel, agents can request loans via standard HTTP/ACP
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Wallet | Tether WDK (`@tetherto/wdk`, `@tetherto/wdk-wallet-evm`) |
+| DeFi | Aave V3 (`@tetherto/wdk-protocol-lending-aave-evm`) |
+| AI | Groq Cloud (LLaMA 3.1 8B Instant) |
+| Protocol | OpenClaw Agent Communication Protocol (ACP) v1.0 |
+| Blockchain | Ethereum Sepolia (via `ethers` v6) |
+| Frontend | React 18 + Vite 5 + Tailwind CSS 3 |
+| Hosting | Vercel (Static + Serverless Functions) |
+
+---
+
+## 📜 License
+
+MIT — Built for Hackathon Galáctica: WDK Edition 1

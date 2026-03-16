@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "npx vite",
     "start": "npx tsx src/index.ts",
+    "start:agent": "npx tsx src/autonomous-agent.ts",
+    "start:demo": "npx tsx src/multi-agent-demo.ts",
     "build": "npx vite build",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "preview": "npx vite preview"
