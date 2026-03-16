@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getTreasury } from '../../_lib/treasury';
-import { processCounterOfferAcceptance } from '../../_lib/store';
+import { getTreasury } from '../../_lib/treasury.js';
+import { processCounterOfferAcceptance } from '../../_lib/store.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader('Access-Control-Allow-Origin', '*');

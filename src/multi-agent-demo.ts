@@ -11,9 +11,10 @@ import fetch from 'node-fetch';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-const API = "http://localhost:3000/api/v1/loan/request";
-const ACCEPT_API = "http://localhost:3000/api/v1/loan/accept";
-const REPAY_API = "http://localhost:3000/api/v1/loan/repay";
+const BASE_URL = process.env.API_URL || "https://m-fi-underwriter.vercel.app";
+const API = `${BASE_URL}/api/v1/loan/request`;
+const ACCEPT_API = `${BASE_URL}/api/v1/loan/accept`;
+const REPAY_API = `${BASE_URL}/api/v1/loan/repay`;
 
 const AGENTS = [
     {

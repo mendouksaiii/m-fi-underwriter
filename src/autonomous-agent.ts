@@ -15,9 +15,10 @@ import { JsonRpcProvider, formatEther, Contract, formatUnits } from 'ethers';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-const UNDERWRITER_API = "http://localhost:3000/api/v1/loan/request";
-const ACCEPT_API = "http://localhost:3000/api/v1/loan/accept";
-const REPAY_API = "http://localhost:3000/api/v1/loan/repay";
+const BASE_URL = process.env.API_URL || "https://m-fi-underwriter.vercel.app";
+const UNDERWRITER_API = `${BASE_URL}/api/v1/loan/request`;
+const ACCEPT_API = `${BASE_URL}/api/v1/loan/accept`;
+const REPAY_API = `${BASE_URL}/api/v1/loan/repay`;
 
 const AGENT_ADDRESS = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
 const RPC_URL = process.env.RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com";

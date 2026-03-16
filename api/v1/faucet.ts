@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getTreasury } from '../_lib/treasury';
+import { getTreasury } from '../../_lib/treasury.js';
 import { saveLoan } from '../_lib/store';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
