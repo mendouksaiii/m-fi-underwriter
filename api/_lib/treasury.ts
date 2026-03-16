@@ -41,6 +41,23 @@ export class MFiTreasury {
         } catch { return "0.00"; }
     }
 
+    public async supplyIdleCapital(amountUsdt: number): Promise<string> {
+        if (!this.initialized) throw new Error("Treasury not initialized");
+        const usdtTokenAddress = process.env.USDT_TOKEN_ADDRESS || "0x7169D38820dfd117C3FA1f22a697dBA58d90BA06";
+        const amountInBaseUnits = parseUnits(amountUsdt.toString(), 6);
+
+        try {
+            const result = await this.aaveProtocol.supply({
+                token: usdtTokenAddress,
+                amount: amountInBaseUnits
+            });
+            return result.hash;
+        } catch (error: Error | unknown) {
+            const msg = error instanceof Error ? error.message : String(error);
+            throw new Error(`Aave Supply Reverted: ${msg}`);
+        }
+    }
+
     public async disburseLoan(recipientAddress: string, amountUsdt: number): Promise<string> {
         if (!this.initialized) throw new Error("Treasury not initialized");
         const usdtAddress = process.env.USDT_TOKEN_ADDRESS || "0x7169D38820dfd117C3FA1f22a697dBA58d90BA06";
