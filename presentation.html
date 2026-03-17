@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M-Fi Underwriter — Hackathon Galáctica</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #0a0a0f;
+            --bg-card: #12121a;
+            --neon-lime: #00ff88;
+            --neon-cyan: #00e5ff;
+            --neon-purple: #a855f7;
+            --neon-pink: #f472b6;
+            --neon-gold: #fbbf24;
+            --text-primary: #e2e8f0;
+            --text-muted: #64748b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .presentation {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 80px;
+            opacity: 0;
+            transform: translateX(60px);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: all;
+        }
+
+        .slide.exit {
+            opacity: 0;
+            transform: translateX(-60px);
+        }
+
+        /* ─── Slide backgrounds ──────────────── */
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(ellipse at 20% 50%, rgba(0,255,136,0.04) 0%, transparent 60%),
+                        radial-gradient(ellipse at 80% 20%, rgba(0,229,255,0.03) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .slide > * { position: relative; z-index: 1; }
+
+        /* ─── Typography ──────────────── */
+        .slide-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--neon-lime);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 16px;
+            opacity: 0;
+            animation: fadeUp 0.5s 0.2s forwards;
+        }
+
+        .slide-title {
+            font-size: clamp(36px, 5vw, 72px);
+            font-weight: 900;
+            line-height: 1.05;
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: fadeUp 0.5s 0.3s forwards;
+        }
+
+        .slide-title .highlight {
+            background: linear-gradient(135deg, var(--neon-lime), var(--neon-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .slide-subtitle {
+            font-size: clamp(16px, 2vw, 22px);
+            color: var(--text-muted);
+            max-width: 700px;
+            text-align: center;
+            line-height: 1.6;
+            opacity: 0;
+            animation: fadeUp 0.5s 0.4s forwards;
+        }
+
+        .slide-body {
+            max-width: 1000px;
+            width: 100%;
+            opacity: 0;
+            animation: fadeUp 0.5s 0.35s forwards;
+        }
+
+        /* ─── Cards ──────────────── */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 28px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--neon-lime);
+            box-shadow: 0 0 30px rgba(0,255,136,0.08);
+            transform: translateY(-4px);
+        }
+
+        .card-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .card p {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* ─── Architecture ──────────────── */
+        .arch-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 32px;
+        }
+
+        .arch-node {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 16px 24px;
+            text-align: center;
+            min-width: 140px;
+        }
+
+        .arch-node.primary {
+            border-color: var(--neon-lime);
+            box-shadow: 0 0 20px rgba(0,255,136,0.1);
+        }
+
+        .arch-node.ai {
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 20px rgba(168,85,247,0.1);
+        }
+
+        .arch-node.defi {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 20px rgba(0,229,255,0.1);
+        }
+
+        .arch-node .node-icon { font-size: 24px; display: block; margin-bottom: 6px; }
+        .arch-node .node-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .arch-node .node-tech { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+
+        .arch-arrow {
+            font-size: 20px;
+            color: var(--neon-lime);
+            opacity: 0.5;
+        }
+
+        /* ─── Lifecycle ──────────────── */
+        .lifecycle {
+            display: flex;
+            gap: 0;
+            margin-top: 32px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .lifecycle-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px 20px;
+            position: relative;
+        }
+
+        .lifecycle-step .step-num {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .lifecycle-step:nth-child(1) .step-num { background: rgba(0,255,136,0.15); color: var(--neon-lime); }
+        .lifecycle-step:nth-child(2) .step-num { background: rgba(0,229,255,0.15); color: var(--neon-cyan); }
+        .lifecycle-step:nth-child(3) .step-num { background: rgba(168,85,247,0.15); color: var(--neon-purple); }
+        .lifecycle-step:nth-child(4) .step-num { background: rgba(0,255,136,0.15); color: var(--neon-lime); }
+        .lifecycle-step:nth-child(5) .step-num { background: rgba(244,114,182,0.15); color: var(--neon-pink); }
+        .lifecycle-step:nth-child(6) .step-num { background: rgba(251,191,36,0.15); color: var(--neon-gold); }
+
+        .lifecycle-step .step-label { font-size: 13px; font-weight: 600; text-align: center; }
+        .lifecycle-step .step-detail { font-size: 11px; color: var(--text-muted); text-align: center; max-width: 120px; margin-top: 4px; }
+
+        .lifecycle-step + .lifecycle-step::before {
+            content: '→';
+            position: absolute;
+            left: -8px;
+            top: 24px;
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        /* ─── Stats bar ──────────────── */
+        .stats-bar {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 42px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--neon-lime), var(--neon-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 4px;
+        }
+
+        /* ─── Track alignment ──────────────── */
+        .track-card {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 20px 28px;
+            margin-bottom: 12px;
+        }
+
+        .track-card.primary {
+            border-color: var(--neon-lime);
+            box-shadow: 0 0 25px rgba(0,255,136,0.06);
+        }
+
+        .track-card .track-icon { font-size: 32px; }
+        .track-card .track-name { font-weight: 700; font-size: 18px; }
+        .track-card .track-fit { font-size: 13px; color: var(--text-muted); }
+        .track-card .track-stars { color: var(--neon-gold); font-size: 16px; margin-left: auto; }
+
+        /* ─── Code block ──────────────── */
+        .code-block {
+            background: #0d0d14;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 24px 28px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            overflow-x: auto;
+            margin-top: 24px;
+            max-width: 800px;
+        }
+
+        .code-block .comment { color: #4a5568; }
+        .code-block .keyword { color: var(--neon-purple); }
+        .code-block .string { color: var(--neon-lime); }
+        .code-block .number { color: var(--neon-cyan); }
+
+        /* ─── Navigation ──────────────── */
+        .nav-bar {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 100;
+            background: rgba(18,18,26,0.9);
+            backdrop-filter: blur(12px);
+            padding: 10px 20px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .nav-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-dot.active {
+            background: var(--neon-lime);
+            box-shadow: 0 0 8px rgba(0,255,136,0.5);
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-primary);
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--neon-lime);
+            color: var(--neon-lime);
+        }
+
+        .slide-counter {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-muted);
+            min-width: 40px;
+            text-align: center;
+        }
+
+        /* ─── Branded top bar ──────────────── */
+        .top-bar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 32px;
+            z-index: 100;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+        }
+
+        .top-bar .brand {
+            font-weight: 700;
+            color: var(--neon-lime);
+            letter-spacing: 2px;
+        }
+
+        .top-bar .hackathon {
+            color: var(--text-muted);
+        }
+
+        /* ─── Animations ──────────────── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(0,255,136,0.1); }
+            50% { box-shadow: 0 0 40px rgba(0,255,136,0.2); }
+        }
+
+        .pulse { animation: pulse-glow 3s infinite; }
+
+        /* ─── Two-column layout ──────────────── */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+            margin-top: 24px;
+        }
+
+        .col h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--neon-lime);
+        }
+
+        .col ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .col ul li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .col ul li::before {
+            content: '→ ';
+            color: var(--neon-lime);
+        }
+
+        /* ─── CTA button ──────────────── */
+        .cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 15px;
+            text-decoration: none;
+            transition: all 0.3s;
+            margin-top: 24px;
+        }
+
+        .cta-btn.primary {
+            background: linear-gradient(135deg, var(--neon-lime), #00cc6a);
+            color: #0a0a0f;
+        }
+
+        .cta-btn.primary:hover {
+            box-shadow: 0 0 30px rgba(0,255,136,0.3);
+            transform: scale(1.03);
+        }
+
+        .cta-btn.secondary {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: var(--text-primary);
+        }
+
+        .cta-btn.secondary:hover {
+            border-color: var(--neon-lime);
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <span class="brand">M-FI UNDERWRITER</span>
+    <span class="hackathon">HACKATHON GALÁCTICA · WDK EDITION 1</span>
+</div>
+
+<div class="presentation" id="presentation">
+
+    <!-- ═══ SLIDE 1: Title ═══ -->
+    <div class="slide active" id="slide-0">
+        <div class="slide-tag">💰 Lending Bot Track</div>
+        <h1 class="slide-title" style="text-align:center">
+            <span class="highlight">M-Fi</span> Underwriter
+        </h1>
+        <p class="slide-subtitle">
+            An autonomous AI credit bureau and micro-lending protocol for machine-to-machine finance.<br><br>
+            <strong style="color:var(--text-primary)">Agents define the rules. The underwriter does the work. Value settles on-chain.</strong>
+        </p>
+        <div class="stats-bar" style="opacity:0; animation: fadeUp 0.5s 0.6s forwards;">
+            <div class="stat">
+                <div class="stat-value">$5,576</div>
+                <div class="stat-label">Treasury USDT</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">&lt;200ms</div>
+                <div class="stat-label">AI Risk Eval</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">5</div>
+                <div class="stat-label">Agent Personas</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">3</div>
+                <div class="stat-label">Outcomes</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ SLIDE 2: Problem ═══ -->
+    <div class="slide" id="slide-1">
+        <div class="slide-tag">The Problem</div>
+        <h1 class="slide-title" style="text-align:center; font-size: clamp(28px, 4vw, 56px);">
+            AI Agents have <span class="highlight">wallets</span><br>but no access to <span class="highlight">credit</span>
+        </h1>
+        <p class="slide-subtitle">
+            When an autonomous agent runs out of gas mid-task, it stops. There's no bank, no credit line, no lender of last resort for machines.
+        </p>
+        <div class="card-grid slide-body" style="max-width: 900px;">
+            <div class="card">
+                <div class="card-icon">⛽</div>
+                <h3>Stranded Agents</h3>
+                <p>Agents running data scraping, arbitrage, or oracle feeds run out of native gas and halt mid-execution. Revenue is lost.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🏦</div>
+                <h3>No Machine Credit</h3>
+                <p>Traditional finance doesn't serve AI agents. There's no credit scoring, no underwriting, and no instant disbursement for autonomous systems.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🤝</div>
+                <h3>No Agent-to-Agent Lending</h3>
+                <p>Agents can't negotiate loan terms with each other. There's no protocol for counter-offers, interest rates, or repayment.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ SLIDE 3: Solution ═══ -->
+    <div class="slide" id="slide-2">
+        <div class="slide-tag">The Solution</div>
+        <h1 class="slide-title" style="text-align:center; font-size: clamp(28px, 4vw, 52px);">
+            <span class="highlight">M-Fi</span> — Machine Finance
+        </h1>
+        <p class="slide-subtitle">
+            An autonomous credit bureau that evaluates on-chain telemetry and disburses USDT loans to AI agents in real-time via Tether WDK.
+        </p>
+        <div class="card-grid slide-body" style="max-width: 900px;">
+            <div class="card">
+                <div class="card-icon">🧠</div>
+                <h3>AI Risk Engine</h3>
+                <p>LLaMA 3.1 8B evaluates wallet age, tx history, balance, and purpose in &lt;200ms. Three outcomes: APPROVE, DENY, or COUNTER_OFFER.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">💸</div>
+                <h3>Instant WDK Disbursement</h3>
+                <p>Approved loans are disbursed on-chain via Tether WDK within seconds. Self-custodial HD wallet, no intermediaries.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">📈</div>
+                <h3>Aave V3 Yield Matrix</h3>
+                <p>Idle treasury capital is autonomously supplied to Aave V3 lending pools. Withdrawals happen just-in-time when loans are approved.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ SLIDE 4: Architecture ═══ -->
+    <div class="slide" id="slide-3">
+        <div class="slide-tag">System Architecture</div>
+        <h1 class="slide-title" style="text-align:center; font-size: clamp(24px, 3.5vw, 44px);">
+            How It <span class="highlight">Works</span>
+        </h1>
+        <div class="arch-flow slide-body">
+            <div class="arch-node">
+                <span class="node-icon">🤖</span>
+                <span class="node-label">AI Agent</span>
+                <span class="node-tech">Borrower</span>
+            </div>
+            <span class="arch-arrow">→</span>
+            <div class="arch-node primary">
+                <span class="node-icon">📡</span>
+                <span class="node-label">OpenClaw ACP</span>
+                <span class="node-tech">API Gateway</span>
+            </div>
+            <span class="arch-arrow">→</span>
+            <div class="arch-node ai">
+                <span class="node-icon">🧠</span>
+                <span class="node-label">LLaMA 3.1</span>
+                <span class="node-tech">Groq · &lt;200ms</span>
+            </div>
+            <span class="arch-arrow">→</span>
+            <div class="arch-node primary pulse">
+                <span class="node-icon">🏦</span>
+                <span class="node-label">WDK Treasury</span>
+                <span class="node-tech">Tether WDK</span>
+            </div>
+            <span class="arch-arrow">→</span>
+            <div class="arch-node defi">
+                <span class="node-icon">⛓️</span>
+                <span class="node-label">Sepolia</span>
+                <span class="node-tech">USDT On-Chain</span>
+            </div>
+        </div>
+        <div class="arch-flow slide-body" style="margin-top: 16px;">
+            <div class="arch-node defi" style="margin-left: auto; margin-right: auto;">
+                <span class="node-icon">📈</span>
+                <span class="node-label">Aave V3</span>
+                <span class="node-tech">Idle Capital → Yield</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ SLIDE 5: Autonomous Lifecycle ═══ -->
+    <div class="slide" id="slide-4">
+        <div class="slide-tag">Agent Autonomy</div>
+        <h1 class="slide-title" style="text-align:center; font-size: clamp(24px, 3.5vw, 44px);">
+            Fully <span class="highlight">Autonomous</span> Lifecycle
+        </h1>
+        <p class="slide-subtitle" style="margin-bottom: 8px;">
+            No human clicks required. The agent independently borrows, negotiates, works, and repays.
+        </p>
+        <div class="lifecycle slide-body">
+            <div class="lifecycle-step">
+                <div class="step-num">1</div>
+                <div class="step-label">Check Balance</div>
+                <div class="step-detail">Monitor own gas + USDT</div>
+            </div>
+            <div class="lifecycle-step">
+                <div class="step-num">2</div>
+                <div class="step-label">Request Loan</div>
+                <div class="step-detail">Contact M-Fi via ACP</div>
+            </div>
+            <div class="lifecycle-step">
+                <div class="step-num">3</div>
+                <div class="step-label">Negotiate</div>
+                <div class="step-detail">Auto-accept if APY ≤ 25%</div>
+            </div>
+            <div class="lifecycle-step">
+                <div class="step-num">4</div>
+                <div class="step-label">Receive USDT</div>
+                <div class="step-detail">WDK disburses on-chain</div>
+            </div>
+            <div class="lifecycle-step">
+                <div class="step-num">5</div>
+                <div class="step-label">Execute Job</div>
+                <div class="step-detail">Arbitrage / Scraping / Oracle</div>
+            </div>
+            <div class="lifecycle-step">
+                <div class="step-num">6</div>
+                <div class="step-label">Repay + Interest</div>
+                <div class="step-detail">Close loan, return capital</div>
+            </div>
+        </div>
+        <div class="code-block slide-body" style="text-align: left;">
+            <span class="comment">// Run the autonomous agent — one command, infinite cycles</span><br>
+            <span class="keyword">$</span> npm run start:agent<br><br>
+            <span class="comment">// Or spawn 5 agents simultaneously</span><br>
+            <span class="keyword">$</span> npm run start:demo
+        </div>
+    </div>
+
+    <!-- ═══ SLIDE 6: AI Risk Engine ═══ -->
+    <div class="slide" id="slide-5">
+        <div class="slide-tag">AI-Powered Decisions</div>
+        <h1 class="slide-title" style="text-align:center; font-size: clamp(24px, 3.5vw, 44px);">
+            Three <span class="highlight">Decision</span> Outcomes
+        </h1>
+        <div class="card-grid slide-body" style="max-width: 900px;">
+            <div class="card" style="border-color: rgba(0,255,136,0.3);">
+                <div class="card-icon">✅</div>
+                <h3 style="color: var(--neon-lime);">APPROVE</h3>
+                <p>High-reputation agent, economically sound purpose, sufficient collateral. Full amount disbursed instantly via WDK.</p>
+            </div>
+            <div class="card" style="border-color: rgba(168,85,247,0.3);">
+                <div class="card-icon">⚖️</div>
+                <h3 style="color: var(--neon-purple);">COUNTER_OFFER</h3>
+                <p>Medium risk. Lower amount with higher APY proposed. Agent autonomously evaluates and accepts or rejects the terms.</p>
+            </div>
+            <div class="card" style="border-color: rgba(244,114,182,0.3);">
+                <div class="card-icon">🚫</div>
+                <h3 style="color: var(--neon-pink);">DENY</h3>
+                <p>New wallet, zero transaction history, Sybil risk detected. Request rejected with reasoning for the agent to improve.</p>
+            </div>
+        </div>
+        <div class="code-block slide-body" style="text-align: left; margin-top: 24px;">
+            <span class="comment">// On-chain data fed to LLaMA 3.1 8B via Groq</span><br>
+            <span class="keyword">const</span> decision = <span class="keyword">await</span> evaluateLoanRisk(<br>
+            &nbsp;&nbsp;agentAddress, <span class="comment">// Wallet</span><br>
+            &nbsp;&nbsp;requestedAmount, <span class="comment">// USDT</span><br>
+            &nbsp;&nbsp;collateral, <span class="comment">// Reputation/Revenue/LP tokens</span><br>
+            &nbsp;&nbsp;purpose <span class="comment">// Economic justification</span><br>
+            );
+        </div>
+    </div>
+
+    <!-- ═══ SLIDE 7: Track Alignment ═══ -->
+    <div class="slide" id="slide-6">
+        <div class="slide-tag">Hackathon Alignment</div>
+        <h1 class="slide-title" style="text-align:center; font-size: clamp(24px, 3.5vw, 44px);">
+            Track <span class="highlight">Fit</span>
+        </h1>
+        <div class="slide-body" style="max-width: 700px;">
+            <div class="track-card primary">
+                <span class="track-icon">💰</span>
+                <div>
+                    <div class="track-name">Lending Bot</div>
+                    <div class="track-fit">Primary — AI-driven autonomous micro-lending with WDK</div>
+                </div>
+                <span class="track-stars">⭐⭐⭐⭐⭐</span>
+            </div>
+            <div class="track-card">
+                <span class="track-icon">🤖</span>
+                <div>
+                    <div class="track-name">Agent Wallets (WDK/OpenClaw)</div>
+                    <div class="track-fit">Deep WDK treasury + OpenClaw ACP protocol integration</div>
+                </div>
+                <span class="track-stars">⭐⭐⭐⭐</span>
+            </div>
+            <div class="track-card">
+                <span class="track-icon">🌊</span>
+                <div>
+                    <div class="track-name">Autonomous DeFi Agent</div>
+                    <div class="track-fit">Aave V3 yield sweeper + just-in-time liquidity</div>
+                </div>
+                <span class="track-stars">⭐⭐⭐</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ SLIDE 8: Tech Stack ═══ -->
+    <div class="slide" id="slide-7">
+        <div class="slide-tag">Under the Hood</div>
+        <h1 class="slide-title" style="text-align:center; font-size: clamp(24px, 3.5vw, 44px);">
+            Tech <span class="highlight">Stack</span>
+        </h1>
+        <div class="two-col slide-body" style="max-width: 800px;">
+            <div class="col">
+                <h3>⛓️ On-Chain</h3>
+                <ul>
+                    <li>Tether WDK (HD Wallet)</li>
+                    <li>Aave V3 Protocol</li>
+                    <li>Ethereum Sepolia</li>
+                    <li>ethers.js v6</li>
+                </ul>
+            </div>
+            <div class="col">
+                <h3>🧠 Off-Chain</h3>
+                <ul>
+                    <li>LLaMA 3.1 8B (Groq)</li>
+                    <li>OpenClaw ACP v1.0</li>
+                    <li>React + Vite + Tailwind</li>
+                    <li>Vercel Serverless</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ SLIDE 9: Demo ═══ -->
+    <div class="slide" id="slide-8">
+        <div class="slide-tag">Live Demo</div>
+        <h1 class="slide-title" style="text-align:center; font-size: clamp(28px, 4vw, 56px);">
+            See It <span class="highlight">Live</span>
+        </h1>
+        <p class="slide-subtitle">
+            The M-Fi Underwriter is deployed and operational on Vercel with a live Sepolia treasury holding $5,576+ USDT.
+        </p>
+        <div style="display: flex; gap: 16px; margin-top: 32px; opacity:0; animation: fadeUp 0.5s 0.5s forwards;">
+            <a href="https://m-fi-underwriter.vercel.app" target="_blank" class="cta-btn primary">🌐 Open Dashboard</a>
+            <a href="https://github.com/mendouksaiii/m-fi-underwriter" target="_blank" class="cta-btn secondary">📦 View Source</a>
+        </div>
+        <div class="code-block" style="text-align: left; margin-top: 32px; opacity:0; animation: fadeUp 0.5s 0.6s forwards;">
+            <span class="comment"># Quick Start — run the full ecosystem</span><br><br>
+            <span class="keyword">$</span> git clone https://github.com/mendouksaiii/m-fi-underwriter<br>
+            <span class="keyword">$</span> npm install<br>
+            <span class="keyword">$</span> npm start &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Backend + WDK Treasury</span><br>
+            <span class="keyword">$</span> npm run dev &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Frontend Dashboard</span><br>
+            <span class="keyword">$</span> npm run start:demo<span class="comment"> # 5 agents, full lifecycle</span>
+        </div>
+    </div>
+
+    <!-- ═══ SLIDE 10: Closing ═══ -->
+    <div class="slide" id="slide-9">
+        <div class="slide-tag">Thank You</div>
+        <h1 class="slide-title" style="text-align:center">
+            <span class="highlight">M-Fi</span> Underwriter
+        </h1>
+        <p class="slide-subtitle">
+            The credit infrastructure that autonomous agents need.<br>
+            <strong style="color:var(--text-primary)">Built for machines. Settled on-chain. Powered by Tether WDK.</strong>
+        </p>
+        <div class="stats-bar" style="opacity:0; animation: fadeUp 0.5s 0.5s forwards;">
+            <div class="stat">
+                <div class="stat-value" style="font-size: 28px;">github.com/mendouksaiii</div>
+                <div class="stat-label">Repository</div>
+            </div>
+        </div>
+        <div style="display: flex; gap: 16px; margin-top: 32px; opacity:0; animation: fadeUp 0.5s 0.6s forwards;">
+            <a href="https://m-fi-underwriter.vercel.app" target="_blank" class="cta-btn primary">🚀 Try It Now</a>
+        </div>
+    </div>
+
+</div>
+
+<!-- Navigation -->
+<div class="nav-bar">
+    <button class="nav-btn" onclick="prevSlide()">←</button>
+    <div id="nav-dots"></div>
+    <span class="slide-counter" id="slide-counter">1/10</span>
+    <button class="nav-btn" onclick="nextSlide()">→</button>
+</div>
+
+<script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+
+    // Build nav dots
+    const dotsContainer = document.getElementById('nav-dots');
+    for (let i = 0; i < totalSlides; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+        dot.onclick = () => goToSlide(i);
+        dotsContainer.appendChild(dot);
+    }
+
+    function goToSlide(n) {
+        if (n < 0 || n >= totalSlides || n === currentSlide) return;
+
+        slides[currentSlide].classList.remove('active');
+        slides[currentSlide].classList.add('exit');
+
+        setTimeout(() => {
+            slides[currentSlide].classList.remove('exit');
+            currentSlide = n;
+            slides[currentSlide].classList.add('active');
+
+            // Reset animations
+            slides[currentSlide].querySelectorAll('[style*="animation"]').forEach(el => {
+                el.style.animation = 'none';
+                el.offsetHeight; // trigger reflow
+                el.style.animation = '';
+            });
+
+            updateNav();
+        }, 300);
+    }
+
+    function nextSlide() { goToSlide(currentSlide + 1); }
+    function prevSlide() { goToSlide(currentSlide - 1); }
+
+    function updateNav() {
+        document.querySelectorAll('.nav-dot').forEach((dot, i) => {
+            dot.className = 'nav-dot' + (i === currentSlide ? ' active' : '');
+        });
+        document.getElementById('slide-counter').textContent = `${currentSlide + 1}/${totalSlides}`;
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', e => {
+        if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+    });
+</script>
+
+</body>
+</html>
