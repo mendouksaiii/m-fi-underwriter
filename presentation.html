@@ -820,19 +820,59 @@
     <div id="nav-dots"></div>
     <span class="slide-counter" id="slide-counter">1/10</span>
     <button class="nav-btn" onclick="nextSlide()">→</button>
+    <div style="width:1px;height:20px;background:rgba(255,255,255,0.1);margin:0 4px;"></div>
+    <button class="nav-btn" id="play-btn" onclick="toggleAutoPlay()" style="font-size:14px;">▶</button>
+    <span id="narration-status" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);min-width:50px;">Ready</span>
 </div>
 
 <script>
+    // ══════════════════════════════════════════
+    //  SLIDE NARRATION SCRIPTS
+    // ══════════════════════════════════════════
+    const narrations = [
+        // Slide 1: Title
+        "Introducing M-Fi Underwriter. An autonomous AI credit bureau and micro-lending protocol, built for machine-to-machine finance. Agents define the rules. The underwriter does the work. And value settles on-chain.",
+
+        // Slide 2: Problem
+        "Here's the problem. AI agents now hold wallets and transact on-chain. But when they run out of gas mid-task, they simply stop. There are no banks for machines. No credit lines. No lender of last resort. Agents can't negotiate loan terms with each other. There's no protocol for counter-offers, interest rates, or repayment.",
+
+        // Slide 3: Solution
+        "M-Fi solves this. It's an autonomous credit bureau that evaluates an agent's on-chain telemetry, and disburses USDT loans in real-time via the Tether Wallet Development Kit. The AI risk engine runs on LLaMA 3.1 via Groq, with sub-200 millisecond evaluation. Approved loans are disbursed instantly — self-custodial, no intermediaries. Idle treasury capital earns yield on Aave V3 while waiting for the next request.",
+
+        // Slide 4: Architecture
+        "Here's how it works. An AI agent contacts M-Fi through the OpenClaw Agent Communication Protocol. The request hits the LLaMA 3.1 risk engine hosted on Groq. If approved, the WDK Treasury signs and broadcasts a USDT transfer on Ethereum Sepolia. Meanwhile, idle capital is parked in Aave V3 for yield generation.",
+
+        // Slide 5: Autonomous Lifecycle
+        "The entire lifecycle is fully autonomous. No human clicks required. Step one: the agent monitors its own gas and USDT balance. Step two: it requests a micro-loan from M-Fi. Step three: it negotiates, auto-accepting counter-offers if the APY is under 25%. Step four: it receives USDT on-chain via WDK. Step five: it executes its job — arbitrage, data scraping, or oracle feeding. Step six: it repays the loan with interest. One command spawns five agents running this loop simultaneously.",
+
+        // Slide 6: AI Decision Outcomes
+        "The AI risk engine produces three possible outcomes. Approve — for high-reputation agents with economically sound purposes. Full amount disbursed instantly. Counter-Offer — for medium-risk agents. A lower amount is proposed with a higher APY. The borrower agent autonomously evaluates and accepts or rejects. And Deny — for new wallets with zero history or detected sybil risk.",
+
+        // Slide 7: Track Alignment
+        "For Hackathon Galactica, M-Fi is a perfect fit for the Lending Bot track — AI-driven autonomous micro-lending with WDK. It also aligns strongly with the Agent Wallets track through deep WDK treasury and OpenClaw ACP integration. And with the Autonomous DeFi Agent track through the Aave V3 yield sweeper.",
+
+        // Slide 8: Tech Stack
+        "Under the hood, the on-chain layer uses Tether WDK for the HD wallet, Aave V3 for yield, Ethereum Sepolia as the settlement layer, and ethers.js version 6. Off-chain, we use LLaMA 3.1 8B via Groq for AI inference, OpenClaw ACP for agent communication, React with Vite and Tailwind for the dashboard, and Vercel serverless functions for the backend.",
+
+        // Slide 9: Live Demo
+        "M-Fi is deployed and operational right now. The treasury on Sepolia holds over 5,500 USDT. You can open the live dashboard, view the source code on GitHub, or clone the repo and run the full multi-agent simulation with a single command.",
+
+        // Slide 10: Closing
+        "M-Fi Underwriter. The credit infrastructure that autonomous agents need. Built for machines. Settled on-chain. Powered by Tether WDK. Thank you."
+    ];
+
     let currentSlide = 0;
     const slides = document.querySelectorAll('.slide');
     const totalSlides = slides.length;
+    let isAutoPlaying = false;
+    let currentUtterance = null;
 
     // Build nav dots
     const dotsContainer = document.getElementById('nav-dots');
     for (let i = 0; i < totalSlides; i++) {
         const dot = document.createElement('div');
         dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
-        dot.onclick = () => goToSlide(i);
+        dot.onclick = () => { stopNarration(); goToSlide(i); };
         dotsContainer.appendChild(dot);
     }
 
@@ -850,11 +890,16 @@
             // Reset animations
             slides[currentSlide].querySelectorAll('[style*="animation"]').forEach(el => {
                 el.style.animation = 'none';
-                el.offsetHeight; // trigger reflow
+                el.offsetHeight;
                 el.style.animation = '';
             });
 
             updateNav();
+
+            // Auto-narrate if playing
+            if (isAutoPlaying) {
+                setTimeout(() => narrateSlide(currentSlide), 800);
+            }
         }, 300);
     }
 
@@ -868,12 +913,87 @@
         document.getElementById('slide-counter').textContent = `${currentSlide + 1}/${totalSlides}`;
     }
 
+    // ══════════════════════════════════════════
+    //  WEB SPEECH API NARRATION
+    // ══════════════════════════════════════════
+    function narrateSlide(index) {
+        if (!('speechSynthesis' in window)) {
+            document.getElementById('narration-status').textContent = 'No TTS';
+            return;
+        }
+
+        window.speechSynthesis.cancel();
+
+        const text = narrations[index];
+        if (!text) return;
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.92;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
+
+        // Try to pick a good English voice
+        const voices = window.speechSynthesis.getVoices();
+        const preferred = voices.find(v => v.name.includes('Google') && v.lang.startsWith('en')) 
+                       || voices.find(v => v.name.includes('Daniel'))
+                       || voices.find(v => v.name.includes('David'))
+                       || voices.find(v => v.lang.startsWith('en'));
+        if (preferred) utterance.voice = preferred;
+
+        utterance.onstart = () => {
+            document.getElementById('narration-status').textContent = '🔊 Speaking';
+        };
+
+        utterance.onend = () => {
+            document.getElementById('narration-status').textContent = 'Done';
+            if (isAutoPlaying && currentSlide < totalSlides - 1) {
+                setTimeout(() => nextSlide(), 1200);
+            } else if (currentSlide === totalSlides - 1) {
+                isAutoPlaying = false;
+                document.getElementById('play-btn').textContent = '▶';
+                document.getElementById('narration-status').textContent = '✅ Finished';
+            }
+        };
+
+        utterance.onerror = () => {
+            document.getElementById('narration-status').textContent = 'Error';
+        };
+
+        currentUtterance = utterance;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function stopNarration() {
+        window.speechSynthesis.cancel();
+        document.getElementById('narration-status').textContent = 'Paused';
+    }
+
+    function toggleAutoPlay() {
+        if (isAutoPlaying) {
+            isAutoPlaying = false;
+            stopNarration();
+            document.getElementById('play-btn').textContent = '▶';
+        } else {
+            isAutoPlaying = true;
+            document.getElementById('play-btn').textContent = '⏸';
+            narrateSlide(currentSlide);
+        }
+    }
+
     // Keyboard navigation
     document.addEventListener('keydown', e => {
-        if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
-        if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); stopNarration(); nextSlide(); }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); stopNarration(); prevSlide(); }
+        if (e.key === ' ') { e.preventDefault(); toggleAutoPlay(); }
     });
+
+    // Load voices (Chrome loads them async)
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.onvoiceschanged = () => {};
+        window.speechSynthesis.getVoices();
+    }
 </script>
 
 </body>
 </html>
+
