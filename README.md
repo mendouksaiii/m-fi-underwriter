@@ -4,8 +4,6 @@
 
 M-Fi (Machine Finance) is an autonomous underwriter that evaluates loan requests from AI agents in real-time, using on-chain telemetry and LLM-driven risk analysis. When approved, loans are disbursed instantly via **Tether WDK** on Ethereum Sepolia. Idle treasury capital is automatically deployed to **Aave V3** for yield generation.
 
-Built for [**Hackathon Galáctica: WDK Edition 1**](https://tether.io) — the first hackathon exploring agents as economic infrastructure.
-
 **Live Demo:** [m-fi-underwriter.vercel.app](https://m-fi-underwriter.vercel.app)
 
 ---
@@ -148,20 +146,14 @@ POST /api/v1/loan/repay
 
 ---
 
-## 🏆 Hackathon Track Alignment
+## 🎯 Use Cases
 
-| Track | Alignment |
+| Use Case | Description |
 |---|---|
-| 💰 **Lending Bot** | ⭐⭐⭐⭐⭐ Primary — AI-driven autonomous micro-lending with WDK |
-| 🤖 **Agent Wallets** | ⭐⭐⭐⭐ Deep WDK integration, OpenClaw ACP protocol |
-| 🌊 **Autonomous DeFi** | ⭐⭐⭐ Aave V3 yield sweeper, just-in-time liquidity |
-
-### Judging Criteria Coverage
-
-- **Technical Correctness:** WDK treasury, Groq AI, Aave V3, OpenClaw ACP — all working end-to-end
-- **Agent Autonomy:** Perpetual lifecycle loop with autonomous negotiation, job execution, and repayment
-- **Economic Soundness:** Risk-adjusted lending with trust scores, counter-offers, interest accrual, and yield generation
-- **Real-World Applicability:** Deployed on Vercel, agents can request loans via standard HTTP/ACP
+| 💰 **Autonomous Micro-Lending** | AI-driven credit scoring and instant loan disbursement for agent economies |
+| 🤖 **Agent Wallets** | Self-custodial HD wallet infrastructure with WDK integration |
+| 🌊 **Yield-Powered Treasury** | Idle capital automatically deployed to Aave V3 for yield generation |
+| 📊 **Trust-Based Credit** | On-chain reputation scoring — no human identity required |
 
 ---
 
@@ -181,4 +173,4 @@ POST /api/v1/loan/repay
 
 ## 📜 License
 
-MIT — Built for Hackathon Galáctica: WDK Edition 1
+MIT

@@ -4,7 +4,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 async function checkBalance() {
-    const rpcUrl = process.env.RPC_URL || "https://rpc.sepolia.org";
+    const rpcUrl = process.env.RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com";
     const treasuryAddress = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
     const borrowerAddress = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
     const usdtAddress = process.env.USDT_TOKEN_ADDRESS || "0x7169D38820dfd117C3FA1f22a697dBA58d90BA06";
