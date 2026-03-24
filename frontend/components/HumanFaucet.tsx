@@ -48,7 +48,7 @@ export function HumanFaucet({ connectedAddress }: HumanFaucetProps) {
       {/* Header with blink dot */}
       <div className="flex items-center gap-3 mb-5 pb-4 border-b border-neon-cyan/15">
         <div className="w-2 h-2 rounded-full bg-neon-cyan shadow-neon-cyan animate-blink"></div>
-        <h3 className="font-display text-sm font-bold text-neon-cyan tracking-widest">TEST FAUCET</h3>
+        <h3 className="font-display text-sm font-bold text-neon-cyan tracking-widest">HUMAN LOAN REQUEST</h3>
       </div>
 
       {/* Amount Presets */}
