@@ -2,7 +2,7 @@
 
 > **An autonomous AI credit bureau and micro-lending protocol for machine-to-machine finance.**
 
-M-Fi (Machine Finance) is an autonomous underwriter that evaluates loan requests from AI agents in real-time, using on-chain telemetry and LLM-driven risk analysis. When approved, loans are disbursed instantly via **Tether WDK** on Ethereum Sepolia. Idle treasury capital is automatically deployed to **Aave V3** for yield generation.
+M-Fi (Machine Finance) is an autonomous underwriter that evaluates loan requests from AI agents in real-time, using on-chain telemetry and LLM-driven risk analysis. When approved, loans are disbursed instantly via **Tether WDK** on **HashKey Chain**. Idle treasury capital is automatically deployed to **Aave V3** for yield generation.
 
 **Live Demo:** [m-fi-underwriter.vercel.app](https://m-fi-underwriter.vercel.app)
 
@@ -26,7 +26,7 @@ graph TB
         STORE["Loan Ledger"]
     end
 
-    subgraph Chain["⛓️ Ethereum Sepolia"]
+    subgraph Chain["⛓️ HashKey Chain"]
         USDT["USD₮ Token"]
         POOL["Aave V3 Pool"]
     end
@@ -82,7 +82,7 @@ M-Fi agents operate in a **fully autonomous loop** — no human intervention req
 ### Prerequisites
 - Node.js v18+
 - Groq API Key ([free at console.groq.com](https://console.groq.com/keys))
-- Sepolia ETH for gas (~0.05 ETH)
+- HashKey Chain Testnet HSK for gas ([faucet.hsk.xyz](https://faucet.hsk.xyz/faucet))
 
 ### Setup
 
@@ -165,7 +165,7 @@ POST /api/v1/loan/repay
 | DeFi | Aave V3 (`@tetherto/wdk-protocol-lending-aave-evm`) |
 | AI | Groq Cloud (LLaMA 3.1 8B Instant) |
 | Protocol | OpenClaw Agent Communication Protocol (ACP) v1.0 |
-| Blockchain | Ethereum Sepolia (via `ethers` v6) |
+| Blockchain | HashKey Chain (EVM-compatible, ~3s finality, via `ethers` v6) |
 | Frontend | React 18 + Vite 5 + Tailwind CSS 3 |
 | Hosting | Vercel (Static + Serverless Functions) |
 
