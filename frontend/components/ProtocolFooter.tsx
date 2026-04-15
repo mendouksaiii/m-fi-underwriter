@@ -14,7 +14,7 @@ export function ProtocolFooter() {
           Autonomous Machine Finance · Built for AI Agents
         </p>
         <div className="flex items-center gap-4">
-          <span className="neon-tag tag-cyan">SEPOLIA</span>
+          <span className="neon-tag tag-cyan">HASHKEY</span>
           <span className="neon-tag tag-lime">WDK</span>
           <span className="neon-tag tag-amber">AAVE V3</span>
         </div>

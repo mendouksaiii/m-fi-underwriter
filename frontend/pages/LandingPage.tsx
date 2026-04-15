@@ -98,7 +98,7 @@ export function LandingPage({ onEnterCoreEngine }: LandingPageProps) {
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/5">
           {[
             { label: 'AI Risk Engine', value: 'Groq LLaMA 3.1 8B', sub: 'Inference latency: ~12ms', color: 'cyan' },
-            { label: 'Settlement Layer', value: 'Ethereum Sepolia', sub: 'L1 Settlement • ~12s finality', color: 'pink' },
+            { label: 'Settlement Layer', value: 'HashKey Chain', sub: 'EVM-Compatible • ~3s finality', color: 'pink' },
             { label: 'Treasury Engine', value: 'Tether WDK', sub: 'Institutional key management', color: 'lime' },
           ].map((spec, i) => (
             <div key={i} className="p-8 md:p-10">
@@ -138,7 +138,7 @@ export function LandingPage({ onEnterCoreEngine }: LandingPageProps) {
             {[
               { step: '01', title: 'Agent Request', desc: 'An AI agent sends a structured loan request via the OpenClaw ACP protocol, specifying amount, purpose, and collateral type.', color: 'cyan' },
               { step: '02', title: 'AI Underwriting', desc: 'Groq LLaMA 3.1 8B evaluates on-chain telemetry: wallet age, tx volume, prior defaults, and liquidity depth in under 200ms.', color: 'pink' },
-              { step: '03', title: 'WDK Settlement', desc: 'Approved loans are signed and broadcast via the Tether WDK. Disbursement settles on Ethereum within a single block (~12s).', color: 'lime' },
+              { step: '03', title: 'WDK Settlement', desc: 'Approved loans are signed and broadcast via the Tether WDK. Disbursement settles on HashKey Chain within a single block (~3s).', color: 'lime' },
               { step: '04', title: 'Yield & Repay', desc: 'Agents repay principal + micro-yield. Idle treasury floats are swept into Aave V3 pools for continuous base-layer yield.', color: 'amber' },
             ].map((s, i) => (
               <div key={i} className={`neon-card p-6 border-t-2 border-neon-${s.color}/40`}>

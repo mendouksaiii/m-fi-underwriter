@@ -18,9 +18,9 @@ export class MFiTreasury {
 
     public async initialize(): Promise<void> {
         if (this.initialized) return;
-        const evmConfig = { provider: process.env.RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com" };
-        this.wdk.registerWallet('ethereum-sepolia', WalletManagerEvm, evmConfig);
-        this.defaultAccount = await this.wdk.getAccount('ethereum-sepolia', 0) as unknown as WalletAccountEvm;
+        const evmConfig = { provider: process.env.RPC_URL || "https://testnet.hsk.xyz" };
+        this.wdk.registerWallet('hashkey-testnet', WalletManagerEvm, evmConfig);
+        this.defaultAccount = await this.wdk.getAccount('hashkey-testnet', 0) as unknown as WalletAccountEvm;
         this.aaveProtocol = new AaveProtocolEvm(this.defaultAccount);
         this.initialized = true;
     }
@@ -30,8 +30,8 @@ export class MFiTreasury {
     public async getLiquidBalance(): Promise<string> {
         if (!this.initialized) return "0.00";
         try {
-            const provider = new JsonRpcProvider(process.env.RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com");
-            const usdtAddress = process.env.USDT_TOKEN_ADDRESS || "0x7169D38820dfd117C3FA1f22a697dBA58d90BA06";
+            const provider = new JsonRpcProvider(process.env.RPC_URL || "https://testnet.hsk.xyz");
+            const usdtAddress = process.env.USDT_TOKEN_ADDRESS || "0xB210D2120d57b758EE163cFfb43e73728c471Cf1";
             const abi = ["function balanceOf(address) view returns (uint256)", "function decimals() view returns (uint8)"];
             const contract = new Contract(usdtAddress, abi, provider);
             const address = await this.defaultAccount.getAddress();
@@ -43,7 +43,7 @@ export class MFiTreasury {
 
     public async supplyIdleCapital(amountUsdt: number): Promise<string> {
         if (!this.initialized) throw new Error("Treasury not initialized");
-        const usdtTokenAddress = process.env.USDT_TOKEN_ADDRESS || "0x7169D38820dfd117C3FA1f22a697dBA58d90BA06";
+        const usdtTokenAddress = process.env.USDT_TOKEN_ADDRESS || "0xB210D2120d57b758EE163cFfb43e73728c471Cf1";
         const amountInBaseUnits = parseUnits(amountUsdt.toString(), 6);
 
         try {
@@ -60,10 +60,10 @@ export class MFiTreasury {
 
     public async disburseLoan(recipientAddress: string, amountUsdt: number): Promise<string> {
         if (!this.initialized) throw new Error("Treasury not initialized");
-        const usdtAddress = process.env.USDT_TOKEN_ADDRESS || "0x7169D38820dfd117C3FA1f22a697dBA58d90BA06";
+        const usdtAddress = process.env.USDT_TOKEN_ADDRESS || "0xB210D2120d57b758EE163cFfb43e73728c471Cf1";
         const amountInBaseUnits = parseUnits(amountUsdt.toString(), 6);
 
-        const provider = new JsonRpcProvider(process.env.RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com");
+        const provider = new JsonRpcProvider(process.env.RPC_URL || "https://testnet.hsk.xyz");
         const abi = ["function balanceOf(address) view returns (uint256)"];
         const contract = new Contract(usdtAddress, abi, provider);
         const treasuryAddress = await this.defaultAccount.getAddress();
