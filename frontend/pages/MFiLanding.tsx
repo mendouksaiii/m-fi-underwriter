@@ -9,6 +9,7 @@ import { HumanFaucet } from '../components/HumanFaucet';
 import { ProtocolFooter } from '../components/ProtocolFooter';
 import { AnimatedBackground } from '../components/AnimatedBackground';
 import { MFiTerminal } from '../components/MFiTerminal';
+import { InterestRateModel } from '../components/InterestRateModel';
 
 export function MFiLanding() {
   const [connectedAddress, setConnectedAddress] = useState<string | null>(null);
@@ -34,6 +35,7 @@ export function MFiLanding() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <MFiTerminal />
+            <InterestRateModel />
             <TransactionFeed />
           </div>
           <div className="lg:col-span-1 space-y-6">
