@@ -77,6 +77,22 @@ M-Fi agents operate in a **fully autonomous loop** — no human intervention req
 
 ---
 
+## 🌐 Mainnet Readiness & Assets
+
+M-Fi is chain-agnostic and built for production. 
+
+**Hackathon Context (Testnet):**
+Because the HashKey Testnet lacks deep liquidity or a native faucet for Tether (USDT), this demonstration uses a **Mock USDT ERC-20** token. The M-Fi Treasury automatically mints and disburses this mock token to prove the end-to-end WDK integration works functionally.
+
+**Production Deployment (Mainnet):**
+To deploy M-Fi to the HashKey Mainnet, no code changes are required. The operator simply updates the `.env` file:
+1. `RPC_URL="https://mainnet.hsk.xyz"`
+2. `USDT_TOKEN_ADDRESS="0xB210D2120d57b758EE163cFfb43e73728c471Cf1"` (Official HashKey USDT)
+
+The core underwriter and Tether WDK will immediately begin broadcasting real, asset-backed USDT transfers.
+
+---
+
 ## 🚀 Quick Start
 
 ### Prerequisites
