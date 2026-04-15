@@ -151,6 +151,19 @@ export function AgentLendingFeed() {
                 <span className="font-mono text-[10px] text-neon-lime">{loan.trustScore}</span>
               </div>
 
+              {/* Tx Hash → HashKey Explorer */}
+              {loan.txHash && (
+                <a
+                  href={`https://hashkey.blockscout.com/tx/${loan.txHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono text-[9px] text-neon-cyan/70 hover:text-neon-cyan transition-colors underline decoration-dotted"
+                  title="View on HashKey Explorer"
+                >
+                  {loan.txHash.slice(0, 6)}...{loan.txHash.slice(-4)} ↗
+                </a>
+              )}
+
               {/* Timestamp */}
               <span className="font-mono text-[9px] text-neon-muted/50 ml-auto">{timeAgo}</span>
             </div>
