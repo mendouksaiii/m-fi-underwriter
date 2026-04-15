@@ -9,7 +9,7 @@ export function ConnectWallet({ onAddressChange }: ConnectWalletProps) {
   const [chainId, setChainId] = useState<string | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const isSepolia = chainId === '0xaa36a7';
+  const isHashKey = chainId === '0x85'; // HashKey Chain Testnet (133)
 
   useEffect(() => {
     const eth = (window as any).ethereum;
@@ -54,9 +54,18 @@ export function ConnectWallet({ onAddressChange }: ConnectWalletProps) {
       const id = await eth.request({ method: 'eth_chainId' });
       setChainId(id);
 
-      if (id !== '0xaa36a7') {
+      if (id !== '0x85') {
         try {
-          await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0xaa36a7' }] });
+          await eth.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: '0x85',
+              chainName: 'HashKey Chain Testnet',
+              nativeCurrency: { name: 'HSK', symbol: 'HSK', decimals: 18 },
+              rpcUrls: ['https://testnet.hsk.xyz'],
+              blockExplorerUrls: ['https://testnet-explorer.hsk.xyz'],
+            }],
+          });
         } catch {}
       }
     } catch {}
@@ -84,9 +93,9 @@ export function ConnectWallet({ onAddressChange }: ConnectWalletProps) {
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         className="flex items-center gap-2 py-2 px-4 border border-neon-cyan/30 rounded bg-neon-cyan/5 hover:bg-neon-cyan/10 transition-all"
       >
-        <span className={`w-2 h-2 rounded-full ${isSepolia ? 'bg-neon-lime shadow-neon-lime' : 'bg-neon-pink shadow-neon-pink'} animate-blink`}></span>
+        <span className={`w-2 h-2 rounded-full ${isHashKey ? 'bg-neon-lime shadow-neon-lime' : 'bg-neon-pink shadow-neon-pink'} animate-blink`}></span>
         <span className="font-mono text-xs text-neon-cyan">{truncate(address)}</span>
-        {!isSepolia && <span className="neon-tag tag-pink text-[9px] py-0 px-1">Wrong Net</span>}
+        {!isHashKey && <span className="neon-tag tag-pink text-[9px] py-0 px-1">Wrong Net</span>}
       </button>
 
       {isDropdownOpen && (
@@ -95,12 +104,12 @@ export function ConnectWallet({ onAddressChange }: ConnectWalletProps) {
           <div className="font-mono text-xs text-neon-cyan mb-3 break-all">{address}</div>
           <div className="neon-divider mb-3"></div>
           <a
-            href={`https://sepolia.etherscan.io/address/${address}`}
+            href={`https://hashkey.blockscout.com/address/${address}`}
             target="_blank"
             rel="noopener noreferrer"
             className="block font-mono text-[11px] text-neon-muted hover:text-neon-cyan transition-colors mb-2 tracking-wider"
           >
-            ↗ VIEW ON ETHERSCAN
+            ↗ VIEW ON HASHKEY EXPLORER
           </a>
           <button
             onClick={disconnect}

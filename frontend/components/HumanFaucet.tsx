@@ -99,7 +99,7 @@ export function HumanFaucet({ connectedAddress }: HumanFaucetProps) {
         <div className="mt-4 p-3 border border-neon-lime/30 bg-neon-lime/5">
           <div className="font-mono text-[10px] text-neon-lime tracking-widest mb-1">✓ DISBURSEMENT CONFIRMED</div>
           <a
-            href={`https://sepolia.etherscan.io/tx/${txHash}`}
+            href={`https://hashkey.blockscout.com/tx/${txHash}`}
             target="_blank"
             rel="noopener noreferrer"
             className="font-mono text-[11px] text-neon-cyan hover:underline break-all"
