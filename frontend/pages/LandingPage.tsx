@@ -183,7 +183,7 @@ export function LandingPage({ onEnterCoreEngine }: LandingPageProps) {
               { label: 'Treasury', title: 'Tether WDK (EVM)', desc: 'HD wallet provisioning and deterministic signing.', color: 'pink' },
               { label: 'AI Engine', title: 'Groq LLaMA 3.1 8B', desc: 'Sub-200ms inference with structured JSON output.', color: 'lime' },
               { label: 'DeFi Layer', title: 'Aave V3 Protocol', desc: 'Automatic idle capital deployment.', color: 'amber' },
-              { label: 'Settlement', title: 'Ethereum Sepolia', desc: 'L1 testnet with USDT (ERC-20) denomination.', color: 'purple' },
+              { label: 'Settlement', title: 'HashKey Chain', desc: 'EVM-compatible L2 with ~3s finality.', color: 'purple' },
               { label: 'Frontend', title: 'React + Vite + Tailwind', desc: 'Real-time dashboard with live data feeds.', color: 'cyan' },
             ].map((t, i) => (
               <div key={i} className="neon-card p-6">
